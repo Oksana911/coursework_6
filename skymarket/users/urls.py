@@ -9,6 +9,6 @@ users_router.register("users", UserViewSet, basename="users")
 
 urlpatterns = [
     path("", include(users_router.urls)),
-    path("api/token/", views.TokenObtainPairView.as_view()),
+    path("token/", views.TokenObtainPairView.as_view()),
     path("refresh/", views.TokenRefreshView.as_view()),
 ]
