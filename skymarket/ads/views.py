@@ -1,7 +1,8 @@
 from rest_framework import pagination, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from ads.models import Ad, Comment
+from ads.permissions import IsOwner
 from ads.serializers import AdSerializer, CommentSerializer
 
 
@@ -20,10 +21,13 @@ class AdViewSet(viewsets.ModelViewSet):
         return Ad.objects.all()
 
     def get_permissions(self):
-        if self.action in ["retrieve", "create", "update", "me", "partial_update"]:
+        if self.action == 'list':
+            self.permission_classes = [AllowAny]
+        elif self.action in ["update", "destroy"]:
+            self.permission_classes = [IsAuthenticated & IsOwner | IsAdminUser]
+        else:
             self.permission_classes = [IsAuthenticated]
-        elif self.action == "destroy":
-            self.permission_classes = [IsAdminUser]
+
         return super().get_permissions()
 
     @action(detail=False, methods=["GET"])
@@ -34,3 +38,13 @@ class AdViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    lookup_field = 'id'
+    http_method_names = ["get", "post", "patch", "delete"]
+
+    def get_queryset(self):
+        self.queryset = self.queryset.filter(ad_id=self.kwargs.get('ad_id'))
+        return super().get_queryset()
+
+    def perform_create(self, serializer):
+        serializer.save(ad_id=self.kwargs.get("ad_id"), author_id=self.request.user.pk)

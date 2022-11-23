@@ -16,5 +16,6 @@ class AdSerializer(serializers.ModelSerializer):
 
 
 class AdDetailSerializer(serializers.ModelSerializer):
-    # TODO сериалайзер для модели
-    pass
+    class Meta:
+        model = Ad
+        fields = '__all__'
