@@ -30,6 +30,10 @@ class AdViewSet(viewsets.ModelViewSet):
 
         return super().get_permissions()
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(author=user)
+
     @action(detail=False, methods=["GET"])
     def me(self, request, *args, **kwargs):
         return super().list(self, request, *args, **kwargs)
