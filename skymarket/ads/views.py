@@ -1,9 +1,12 @@
 from rest_framework import pagination, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from ads.filters import AdFilter
 from ads.models import Ad, Comment
 from ads.permissions import IsOwner
 from ads.serializers import AdSerializer, CommentSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 
 class AdPagination(pagination.PageNumberPagination):
@@ -14,6 +17,8 @@ class AdViewSet(viewsets.ModelViewSet):
     queryset = Ad.objects.all()
     serializer_class = AdSerializer
     pagination_class = AdPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = AdFilter
 
     def get_queryset(self):
         if self.action == "me":
